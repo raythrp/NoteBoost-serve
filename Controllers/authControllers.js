@@ -35,8 +35,8 @@ exports.register = async (req, res) => {
       jenjang,
       provider: "password"
     });
-    await admin.auth().generateEmailVerificationLink(email);
-    res.json({ email, message: "Verification email sent" });
+    const verificationLink = await admin.auth().generateEmailVerificationLink(email);
+    res.json({ email, message: "Verification email sent", verificationLink });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
