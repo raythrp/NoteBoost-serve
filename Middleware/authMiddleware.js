@@ -1,4 +1,4 @@
-const { admin } = require("../config/firebase");
+const { admin } = require("../Config/firebase");
 
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split("Bearer ")[1];
