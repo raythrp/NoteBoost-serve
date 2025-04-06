@@ -1,9 +1,16 @@
 const { admin, db } = require("../Config/firebase");
+const transporter = require("../Config/mailer");
 
 exports.login = async (req, res) => {
   const { idToken } = req.body;
+
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    if (!decodedToken.email_verified) {
+      return res.status(401).json({ error: "Email belum diverifikasi." });
+    }
+
     const email = decodedToken.email;
     const provider = decodedToken.firebase.sign_in_provider;
     const userRef = db.collection("users").doc(email);
@@ -16,13 +23,23 @@ exports.login = async (req, res) => {
         kelas: null,
         jenjang: null
       });
+
       return res.json({ email, needsAdditionalInfo: true });
     }
-    res.json({ email, needsAdditionalInfo: !userDoc.data().kelas || !userDoc.data().jenjang });
+
+    const { kelas, jenjang } = userDoc.data();
+
+    res.json({
+      email,
+      needsAdditionalInfo: !kelas || !jenjang
+    });
+
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    console.error("Login error:", error);
+    res.status(401).json({ error: "Token tidak valid atau login gagal." });
   }
 };
+
 
 exports.register = async (req, res) => {
   const { email, password, nama, kelas, jenjang } = req.body;
@@ -35,12 +52,28 @@ exports.register = async (req, res) => {
       jenjang,
       provider: "password"
     });
+
     const verificationLink = await admin.auth().generateEmailVerificationLink(email);
-    res.json({ email, message: "Verification email sent", verificationLink });
+
+    await transporter.sendMail({
+      from: `"NoteBoost" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verifikasi Email NoteBoost",
+      html: `
+        <p>Hai ${nama}!</p>
+        <p>Terima kasih telah mendaftar di NoteBoost.</p>
+        <p>Klik link berikut untuk verifikasi email kamu:</p>
+        <a href="${verificationLink}">${verificationLink}</a>
+        <p><b>Note:</b> Jika kamu tidak merasa mendaftar, abaikan email ini.</p>
+      `
+    });
+
+    res.json({ email, message: "Verification email sent to user" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 exports.updateUserInfo = async (req, res) => {
   const { email, kelas, jenjang } = req.body;
