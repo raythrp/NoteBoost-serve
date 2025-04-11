@@ -20,18 +20,17 @@ exports.login = async (req, res) => {
       await userRef.set({
         email,
         provider,
-        kelas: null,
         jenjang: null
       });
 
       return res.json({ email, needsAdditionalInfo: true });
     }
 
-    const { kelas, jenjang } = userDoc.data();
+    const { jenjang } = userDoc.data();
 
     res.json({
       email,
-      needsAdditionalInfo: !kelas || !jenjang
+      needsAdditionalInfo: !jenjang
     });
 
   } catch (error) {
@@ -40,15 +39,15 @@ exports.login = async (req, res) => {
   }
 };
 
-
 exports.register = async (req, res) => {
-  const { email, password, nama, kelas, jenjang } = req.body;
+  const { email, password, nama, jenjang } = req.body;
+
   try {
     const userRecord = await admin.auth().createUser({ email, password });
+
     await db.collection("users").doc(email).set({
       email,
       nama,
-      kelas,
       jenjang,
       provider: "password"
     });
@@ -74,12 +73,13 @@ exports.register = async (req, res) => {
   }
 };
 
-
 exports.updateUserInfo = async (req, res) => {
-  const { email, kelas, jenjang } = req.body;
+  const { email, jenjang } = req.body;
+
   try {
     const userRef = db.collection("users").doc(email);
-    await userRef.update({ kelas, jenjang });
+    await userRef.update({ jenjang });
+
     res.json({ message: "User info updated" });
   } catch (error) {
     res.status(400).json({ error: error.message });
