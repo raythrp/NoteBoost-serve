@@ -15,7 +15,7 @@ app.use("/api/auth", authRoutes);
 app.use('/api/image', imageRoutes);
 app.use("/api/user", userRoutes);
 
-const PORT = 8080 ;
+const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
