@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../serviceAccountKey.json");
 require("dotenv").config();
+const serviceAccount = process.env.ENVIRONMENT == 'development' ? require("../noteboost-ff14a6993ce5.json") : require('/secrets/FIREBASE_KEY');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
