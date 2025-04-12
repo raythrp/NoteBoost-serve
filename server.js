@@ -13,7 +13,7 @@ app.use("/", authRoutes);
 app.use('/api/image', imageRoutes);
 app.use("/user", userRoutes);
 
-const PORT = process.env.ENVIRONMENT == 'development' ? process.env.PORT : process.env.PROD_PORT ;
+const PORT = process.env.PORT || 8080 ;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
