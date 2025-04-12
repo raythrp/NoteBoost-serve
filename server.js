@@ -7,8 +7,7 @@ require("dotenv").config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-
+app.use(express.json());    
 app.use("/", authRoutes);
 app.use('/api/image', imageRoutes);
 app.use("/user", userRoutes);
