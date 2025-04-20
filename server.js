@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use('/api/image', imageRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/history", historyRoutes);
+app.use("/api", historyRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
