@@ -20,13 +20,14 @@ exports.login = async (req, res) => {
       await userRef.set({
         email,
         provider,
-        jenjang: null
+        jenjang: null,
+        nama: null
       });
 
       return res.json({ email, needsAdditionalInfo: true });
     }
 
-    const { jenjang } = userDoc.data();
+    const { nama, jenjang } = userDoc.data();
 
     res.json({
       email,
