@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Create History
 router.post("/history", verifyToken, async (req, res) => {
-  const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli, hasil_enhance } = req.body;
+  const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli } = req.body;
 
   const email = req.user.email;
 
@@ -18,7 +18,7 @@ router.post("/history", verifyToken, async (req, res) => {
       mata_pelajaran,
       topik,
       isi_catatan_asli,
-      hasil_enhance,
+      hasil_enhance: null,
     });
     res.status(201).json({ message: "Catatan berhasil dibuat", id: historyRef.id });
   } catch (error) {
@@ -56,8 +56,13 @@ router.put("/history/:id", verifyToken, async (req, res) => {
       mata_pelajaran,
       topik,
       isi_catatan_asli,
-      hasil_enhance,
     });
+
+    // Update hasil_enhance hanya jika ada dalam request body
+    if (hasil_enhance !== undefined) {
+      updateData.hasil_enhance = hasil_enhance;
+    }
+    
     res.status(200).json({ message: "Catatan berhasil diperbarui" });
   } catch (error) {
     res.status(500).json({ error: "Catatan gagal diperbarui" });
