@@ -92,6 +92,31 @@ exports.updateUserInfo = async (req, res) => {
   }
 };
 
+exports.updateJenjang = async (req, res) => {
+  const { email, jenjang } = req.body;
+
+  if (!email || !jenjang) {
+    return res.status(400).json({ error: "Email dan Jenjang wajib diisi" });
+  }
+
+  try {
+    const userRef = db.collection("users").doc(email);
+    
+    const userDoc = await userRef.get();
+    
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User tidak ditemukan" });
+    }
+
+    await userRef.update({ jenjang });
+
+    res.json({ message: "Jenjang berhasil diperbarui" });
+  } catch (error) {
+    console.error("Error updating jenjang:", error);
+    res.status(500).json({ error: "Terjadi kesalahan saat memperbarui jenjang" });
+  }
+};
+
 exports.logout = async (req, res) => {
   res.json({ message: "Logout handled on the client side" });
 };
