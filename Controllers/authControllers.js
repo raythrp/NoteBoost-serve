@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
         email,
         provider,
         jenjang: null,
-        nama: null
+        nama: decodedToken.name
       });
 
       return res.json({ email, needsAdditionalInfo: true });
