@@ -5,7 +5,9 @@ const router = express.Router();
 
 // Create History
 router.post("/history", verifyToken, async (req, res) => {
-  const { email, tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli, hasil_enhance } = req.body;
+  const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli } = req.body;
+
+  const email = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc();
@@ -16,7 +18,7 @@ router.post("/history", verifyToken, async (req, res) => {
       mata_pelajaran,
       topik,
       isi_catatan_asli,
-      hasil_enhance,
+      hasil_enhance: null,
     });
     res.status(201).json({ message: "Catatan berhasil dibuat", id: historyRef.id });
   } catch (error) {
@@ -31,7 +33,7 @@ router.get("/history", verifyToken, async (req, res) => {
   try {
     const snapshot = await db.collection("history").where("email", "==", userEmail).get();
     if (snapshot.empty) {
-      return res.status(404).json({ message: "Tidak ditemukan catatan" });
+      return res.status(200).json({ message: "Tidak ditemukan catatan" });
     }
 
     const historyList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -54,8 +56,13 @@ router.put("/history/:id", verifyToken, async (req, res) => {
       mata_pelajaran,
       topik,
       isi_catatan_asli,
-      hasil_enhance,
     });
+
+    // Update hasil_enhance hanya jika ada dalam request body
+    if (hasil_enhance !== undefined) {
+      updateData.hasil_enhance = hasil_enhance;
+    }
+    
     res.status(200).json({ message: "Catatan berhasil diperbarui" });
   } catch (error) {
     res.status(500).json({ error: "Catatan gagal diperbarui" });
