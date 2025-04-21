@@ -1,5 +1,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const { db } = require("../Config/firebase");
+
 
 const extractTextFromImage = async (req, res) => {
     try {
@@ -36,4 +38,66 @@ const extractTextFromImage = async (req, res) => {
     }
 };
 
-module.exports = { extractTextFromImage };
+const extractTextAndSave = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No image uploaded' });
+        }
+
+        console.log("File uploaded:", req.file);
+        console.log("User email:", req.user.email);
+
+        const form = new FormData();
+        form.append('file', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype,
+        });
+        form.append('language', 'eng');
+        form.append('isOverlayRequired', 'false');
+
+        const response = await axios.post('https://api.ocr.space/parse/image', form, {
+            headers: {
+                ...form.getHeaders(),
+                apikey: 'K86347452688957',
+            },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+        });
+
+        const parsedText = response.data?.ParsedResults?.[0]?.ParsedText || 'No text found';
+
+        // Ambil data dari body request
+        const { tanggal_waktu, kelas, mata_pelajaran, topik } = req.body;
+        const email = req.user.email; // dari verifyToken
+
+        if (!tanggal_waktu || !kelas || !mata_pelajaran || !topik) {
+            return res.status(400).json({ error: 'Missing required fields in request body' });
+        }
+
+        // Simpan ke Firestore
+        const historyRef = db.collection('history').doc();
+        await historyRef.set({
+            email,
+            tanggal_waktu,
+            kelas,
+            mata_pelajaran,
+            topik,
+            isi_catatan_asli: parsedText,
+            hasil_enhance: null,
+        });
+
+        return res.status(201).json({
+            message: 'Catatan berhasil dibuat dari gambar',
+            extractedText: parsedText,
+            id: historyRef.id
+        });
+    } catch (error) {
+        console.error('OCR Save Error:', error.response?.data || error.message || error);
+        return res.status(500).json({ error: 'Gagal mengekstrak dan menyimpan catatan' });
+    }
+};
+
+module.exports = {
+    extractTextFromImage,
+    extractTextAndSave,
+  };
