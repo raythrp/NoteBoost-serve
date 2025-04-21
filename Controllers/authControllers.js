@@ -36,6 +36,7 @@ exports.login = async (req, res) => {
     res.json({
       email,
       nama,
+      jenjang,
       needsAdditionalInfo: !jenjang
     });
 
