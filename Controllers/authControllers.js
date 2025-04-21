@@ -29,6 +29,10 @@ exports.login = async (req, res) => {
 
     const { nama, jenjang } = userDoc.data();
 
+    if (!nama && decodedToken.name) {
+      await userRef.update({ nama: decodedToken.name });
+    }
+
     res.json({
       email,
       nama,
