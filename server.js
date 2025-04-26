@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const authRoutes = require("./Routes/authRoutes");
 const imageRoutes = require('./Routes/imageRoutes');
 const userRoutes = require("./Routes/userRoutes");
@@ -7,6 +8,7 @@ const historyRoutes = require("./Routes/historyRoutes");
 require("dotenv").config();
 
 const app = express();
+app.use(express.static(path.join(__dirname, 'Public')));
 app.use(cors({
   origin: ["http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE"],
@@ -25,5 +27,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
 
