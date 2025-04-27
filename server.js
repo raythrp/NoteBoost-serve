@@ -20,10 +20,10 @@ app.get("/", (req, res) => {
     res.send("NoteBoost Backend is alive!");
 });
 app.use("/api/auth", authRoutes);
-app.use('/api/image', imageRoutes);
+app.use("/api/image", imageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api", historyRoutes);
-app.use('/api/profilepic', profilePictureRoutes);
+app.use("/api/profilepic", profilePictureRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
