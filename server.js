@@ -5,6 +5,7 @@ const authRoutes = require("./Routes/authRoutes");
 const imageRoutes = require('./Routes/imageRoutes');
 const userRoutes = require("./Routes/userRoutes");
 const historyRoutes = require("./Routes/historyRoutes");
+const profilePictureRoutes = require('./Routes/profilePictureRoutes');
 require("dotenv").config();
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use('/api/image', imageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api", historyRoutes);
+app.use('/api/profilepic', profilePictureRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
