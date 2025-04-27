@@ -1,5 +1,6 @@
 const { admin, db } = require("../Config/firebase");
 const transporter = require("../Config/mailer");
+const axios = require('axios');
 
 exports.login = async (req, res) => {
   const { idToken } = req.body;
@@ -153,13 +154,19 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   const { oobCode, newPassword } = req.body;
 
+  if (!oobCode || !newPassword) {
+    return res.status(400).json({ error: "OobCode dan Password wajib diisi." });
+  }
+
   try {
-    const email = await admin.auth().verifyPasswordResetCode(oobCode);
-    await admin.auth().confirmPasswordReset(oobCode, newPassword);
+    const firebaseRes = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:resetPassword?key=${process.env.FIREBASE_API_KEY}`, {
+      oobCode,
+      newPassword
+    });
 
     res.json({ message: "Password berhasil direset" });
   } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(400).json({ error: error.message });
+    console.error("Reset password error:", error.response?.data || error.message);
+    res.status(400).json({ error: error.response?.data?.error?.message || "Gagal reset password" });
   }
 };

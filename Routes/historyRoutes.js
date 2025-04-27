@@ -69,7 +69,6 @@ router.put("/history/:id", verifyToken, async (req, res) => {
   }
 });
 
-// Delete History
 router.delete("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
@@ -81,5 +80,60 @@ router.delete("/history/:id", verifyToken, async (req, res) => {
     res.status(500).json({ error: "Catatan gagal dihapus" });
   }
 });
+
+router.post("/history/:id/enhance", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const historyRef = db.collection("history").doc(id);
+    const historyDoc = await historyRef.get();
+
+    if (!historyDoc.exists) {
+      return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    }
+
+    const { isi_catatan_asli, topik, kelas, mata_pelajaran, jenjang } = historyDoc.data();
+
+    if (!isi_catatan_asli) {
+      return res.status(400).json({ error: "Catatan masih kosong, tidak bisa enhance" });
+    }
+
+    // Prompt Gemini dengan konteks lengkap
+    const prompt = `Konteks Catatan:
+    - Jenjang Pendidikan: ${jenjang}
+    - Kelas: ${kelas}
+    - Mata Pelajaran: ${mata_pelajaran}
+    - Topik: ${topik}
+
+    Tolong perbaiki dan buat catatan berikut menjadi lebih rapi, jelas, dan sesuai dengan standar jenjang tersebut:
+
+    "${isi_catatan_asli}"`;
+
+    const geminiResponse = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=YOUR_API_KEY`,
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+      },
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    const enhancedNote = geminiResponse.data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!enhancedNote) {
+      return res.status(500).json({ error: "Gagal mendapatkan hasil enhance dari Gemini" });
+    }
+
+    await historyRef.update({ hasil_enhance: enhancedNote });
+
+    res.status(200).json({ message: "Catatan berhasil dienhance", hasil_enhance: enhancedNote });
+
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    res.status(500).json({ error: "Gagal melakukan enhance catatan" });
+  }
+});
+
 
 module.exports = router;
