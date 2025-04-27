@@ -128,8 +128,11 @@ exports.forgotPassword = async (req, res) => {
 
   try {
     const user = await admin.auth().getUserByEmail(email);
-
-    const resetLink = await admin.auth().generatePasswordResetLink(email);
+    const actionCodeSettingsReset = {
+      url: 'https://noteboost-serve-772262781875.asia-southeast2.run.app/reset-password.html',
+      handleCodeInApp: false,
+    };
+    const resetLink = await admin.auth().generatePasswordResetLink(email, actionCodeSettingsReset);
 
     await transporter.sendMail({
       from: `"NoteBoost" <${process.env.EMAIL_USER}>`,
