@@ -11,7 +11,11 @@ require("dotenv").config();
 const app = express();
 app.use(express.static(path.join(__dirname, 'Public')));
 app.use(cors({
-  origin: ["http://localhost:5173"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "https://noteboost-772262781875.asia-southeast2.run.app"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
