@@ -3,7 +3,6 @@ const { admin, db } = require("../Config/firebase");
 const verifyToken = require("../Middleware/authMiddleware");
 const router = express.Router();
 
-// Create History
 router.post("/history", verifyToken, async (req, res) => {
   const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli } = req.body;
 
@@ -26,7 +25,6 @@ router.post("/history", verifyToken, async (req, res) => {
   }
 });
 
-// Read History by Email (User Specific)
 router.get("/history", verifyToken, async (req, res) => {
   const userEmail = req.user.email;
 
@@ -43,7 +41,6 @@ router.get("/history", verifyToken, async (req, res) => {
   }
 });
 
-// Update History
 router.put("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli, hasil_enhance } = req.body;
@@ -58,7 +55,6 @@ router.put("/history/:id", verifyToken, async (req, res) => {
       isi_catatan_asli,
     });
 
-    // Update hasil_enhance hanya jika ada dalam request body
     if (hasil_enhance !== undefined) {
       updateData.hasil_enhance = hasil_enhance;
     }
@@ -98,7 +94,6 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       return res.status(400).json({ error: "Catatan masih kosong, tidak bisa enhance" });
     }
 
-    // Prompt Gemini dengan konteks lengkap
     const prompt = `Konteks Catatan:
     - Jenjang Pendidikan: ${jenjang}
     - Kelas: ${kelas}

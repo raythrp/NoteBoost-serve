@@ -36,4 +36,24 @@ router.post("/update-profile-picture", verifyToken, upload.single('profilePictur
   }
 });
 
+router.get("/get-profile-picture", verifyToken, async (req, res) => {
+  try {
+    const email = req.query.email;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const doc = await db.collection("profilePictures").doc(email).get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Profile picture not found" });
+    }
+
+    const data = doc.data();
+    res.json({ photoUrl: data.photoUrl });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch profile picture" });
+  }
+});
+
 module.exports = router;
