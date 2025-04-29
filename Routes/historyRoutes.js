@@ -43,20 +43,20 @@ router.get("/history", verifyToken, async (req, res) => {
 
 router.put("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { isi_catatan_asli } = req.body;
+  const { tanggal_waktu, isi_catatan_asli } = req.body;
 
   try {
     const historyRef = db.collection("history").doc(id);
     await historyRef.update({
+      tanggal_waktu,
       isi_catatan_asli,
     });
 
-    res.status(200).json({ message: "Catatan asli berhasil diperbarui" });
+    res.status(200).json({ message: "Catatan berhasil diperbarui" });
   } catch (error) {
-    res.status(500).json({ error: "Catatan asli gagal diperbarui" });
+    res.status(500).json({ error: "Catatan gagal diperbarui" });
   }
 });
-
 router.put("/history/:id/update-details", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { kelas, mata_pelajaran, topik } = req.body; // Update kelas, matpel, dan topik
