@@ -43,25 +43,35 @@ router.get("/history", verifyToken, async (req, res) => {
 
 router.put("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli, hasil_enhance } = req.body;
+  const { tanggal_waktu, isi_catatan_asli } = req.body;
 
   try {
     const historyRef = db.collection("history").doc(id);
     await historyRef.update({
       tanggal_waktu,
-      kelas,
-      mata_pelajaran,
-      topik,
       isi_catatan_asli,
     });
 
-    if (hasil_enhance !== undefined) {
-      updateData.hasil_enhance = hasil_enhance;
-    }
-    
     res.status(200).json({ message: "Catatan berhasil diperbarui" });
   } catch (error) {
     res.status(500).json({ error: "Catatan gagal diperbarui" });
+  }
+});
+router.put("/history/:id/update-details", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { kelas, mata_pelajaran, topik } = req.body; // Update kelas, matpel, dan topik
+
+  try {
+    const historyRef = db.collection("history").doc(id);
+    await historyRef.update({
+      kelas,
+      mata_pelajaran,
+      topik,
+    });
+
+    res.status(200).json({ message: "Kelas, Mata Pelajaran, dan Topik berhasil diperbarui" });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal memperbarui Kelas, Mata Pelajaran, dan Topik" });
   }
 });
 
