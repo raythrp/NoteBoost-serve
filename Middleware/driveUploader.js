@@ -42,17 +42,15 @@ async function uploadToDrive(file) {
       },
     });
 
-    const result = await drive.files.get({
-      fileId: fileId,
-      fields: 'webViewLink, webContentLink',
-    });
-
-    return result.data.webContentLink;
+    // Return embed-able link instead of download link
+    const publicThumbnailUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=s1080`;
+    return publicThumbnailUrl;
 
   } catch (error) {
     console.error('Error uploading file to Google Drive:', error);
     throw error;
   }
 }
+
 
 module.exports = { uploadToDrive };
