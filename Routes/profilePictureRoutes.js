@@ -14,13 +14,19 @@ router.post("/update-profile-picture", verifyToken, upload.single('profilePictur
   try {
     const file = req.file;
     const email = req.user.email; // dapat dari token
+    
+    console.log("📥 Upload request received");
+    console.log("👤 Email from token:", email);
+    console.log("🖼️ File uploaded:", file?.originalname, "| Type:", file?.mimetype, "| Size:", file?.size);
+
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    console.log("🚀 Uploading file to Google Drive...");
     // Upload file ke Google Drive
     const driveLink = await uploadToDrive(file);
-
+    console.log("✅ Drive link returned:", driveLink);
     // Save link ke Firestore (collection: profilePictures)
     const docRef = db.collection("profilePictures").doc(email);
     await docRef.set({
@@ -31,7 +37,11 @@ router.post("/update-profile-picture", verifyToken, upload.single('profilePictur
     res.json({ success: true, photoUrl: driveLink });
 
   } catch (error) {
-    console.error(error);
+    console.error("🔥 Failed in upload route:", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data,
+    });
     res.status(500).json({ error: "Failed to upload profile picture" });
   }
 });
