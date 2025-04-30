@@ -13,12 +13,14 @@ const FOLDER_ID = '1SN58MoI5OQfWKPZYRATYlJnLC7azPAsI';
 
 async function uploadToDrive(file) {
   try {
+    if (!file || !file.buffer) throw new Error("File buffer missing!");
+
     const bufferStream = new Readable();
     bufferStream.push(file.buffer);
     bufferStream.push(null);
 
-    const timestamp = Date.now();
-    const fileName = `${timestamp}-${file.originalname}`;
+    const fileName = `${Date.now()}-${file.originalname}`;
+    console.log("⏳ Uploading:", fileName);
 
     const response = await drive.files.create({
       requestBody: {
@@ -35,22 +37,20 @@ async function uploadToDrive(file) {
     const fileId = response.data.id;
 
     await drive.permissions.create({
-      fileId: fileId,
+      fileId,
       requestBody: {
-        role: 'reader',
-        type: 'anyone',
+        role: "reader",
+        type: "anyone",
       },
     });
 
-    // Return embed-able link instead of download link
-    const publicThumbnailUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=s1080`;
-    return publicThumbnailUrl;
+    const link = `https://drive.google.com/thumbnail?id=${fileId}&sz=s1080`;
+    console.log("✅ Uploaded:", link);
+    return link;
 
   } catch (error) {
-    console.error('Error uploading file to Google Drive:', error);
+    console.error("❌ Upload to Drive failed:", error.message);
     throw error;
   }
 }
-
-
 module.exports = { uploadToDrive };
