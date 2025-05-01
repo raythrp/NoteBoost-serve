@@ -1,12 +1,7 @@
 const { google } = require('googleapis');
-const path = require('path');
 const { Readable } = require('stream');
 
-const keyPath = path.join(__dirname, '../Config/noteboost-9338bf458b11.json');
-console.log("🔑 Google keyFile path:", keyPath);
-
 const auth = new google.auth.GoogleAuth({
-  keyFile: keyPath,
   scopes: ['https://www.googleapis.com/auth/drive'],
 });
 
