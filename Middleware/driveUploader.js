@@ -5,7 +5,7 @@ const path = require('path');
 
 const serviceAccount = process.env.ENVIRONMENT === 'development'
   ? require("../Config/noteboost-9338bf458b11.json")
-  : JSON.parse(fs.readFileSync('/secrets/drive', 'utf8'));
+  : JSON.parse(fs.readFileSync('/secrets/drive/DRIVE_KEY', 'utf8'));
 
 const auth = new google.auth.GoogleAuth({
   credentials: serviceAccount,
