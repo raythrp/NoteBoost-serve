@@ -51,7 +51,7 @@ async function uploadToDrive(file) {
     });
 
 
-    const link = `https://drive.google.com/uc?export=view&id=${response.data.id}`;
+    const link = `https://drive.google.com/thumbnail?id=${response.data.id}`
 
 
     console.log("🌍 Public link:", link);
