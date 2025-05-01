@@ -49,7 +49,8 @@ async function uploadToDrive(file) {
       requestBody: { role: "reader", type: "anyone" },
     });
 
-    const link = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
+    const link = `https://lh3.googleusercontent.com/d/${response.data.id}=s1080`;
+
     console.log("🌍 Public link:", link);
     return link;
 
