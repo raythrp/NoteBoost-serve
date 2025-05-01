@@ -40,7 +40,7 @@ async function uploadToDrive(file) {
         mimeType: file.mimetype,
         body: bufferStream,
       },
-      fields: 'id, thumbnailLink, webContentLink, webViewLink',
+      fields: 'id',
     });
 
     console.log("✅ Google Drive upload response:", response.data);
@@ -50,7 +50,9 @@ async function uploadToDrive(file) {
       requestBody: { role: "reader", type: "anyone" },
     });
 
-    const link = `https://drive.google.com/file/d/${response.data.id}/preview`;
+
+    const link = `https://drive.google.com/uc?export=view&id=${response.data.id}`;
+
 
     console.log("🌍 Public link:", link);
     return link;
