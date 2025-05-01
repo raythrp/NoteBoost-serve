@@ -1,9 +1,14 @@
 const { google } = require('googleapis');
-const path = require('path');
 const { Readable } = require('stream');
+const fs = require('fs');
+const path = require('path');
+
+const serviceAccount = process.env.ENVIRONMENT === 'development'
+  ? require("../Config/noteboost-9338bf458b11.json")
+  : JSON.parse(fs.readFileSync('/secrets/drive', 'utf8'));
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, '../Config/noteboost-9338bf458b11.json'),
+  credentials: serviceAccount,
   scopes: ['https://www.googleapis.com/auth/drive'],
 });
 
@@ -14,6 +19,9 @@ const FOLDER_ID = '1SN58MoI5OQfWKPZYRATYlJnLC7azPAsI';
 async function uploadToDrive(file) {
   try {
     if (!file || !file.buffer) throw new Error("File buffer missing!");
+
+    console.log("📤 Uploading file to Drive:", file.originalname);
+    console.log("📏 Buffer size:", file.buffer.length);
 
     const bufferStream = new Readable();
     bufferStream.push(file.buffer);
@@ -34,23 +42,26 @@ async function uploadToDrive(file) {
       },
     });
 
-    const fileId = response.data.id;
+    console.log("✅ Google Drive upload response:", response.data);
 
     await drive.permissions.create({
-      fileId,
-      requestBody: {
-        role: "reader",
-        type: "anyone",
-      },
+      fileId: response.data.id,
+      requestBody: { role: "reader", type: "anyone" },
     });
 
-    const link = `https://drive.google.com/thumbnail?id=${fileId}&sz=s1080`;
-    console.log("✅ Uploaded:", link);
+    const link = `https://drive.google.com/thumbnail?id=${response.data.id}&sz=s1080`;
+    console.log("🌍 Public link:", link);
     return link;
 
   } catch (error) {
-    console.error("❌ Upload to Drive failed:", error.message);
+    console.error("❌ Upload to Drive failed:", {
+      message: error.message,
+      stack: error.stack,
+      code: error.code,
+      response: error.response?.data,
+    });
     throw error;
   }
 }
+
 module.exports = { uploadToDrive };
