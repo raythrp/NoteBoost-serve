@@ -1,7 +1,14 @@
 const { google } = require('googleapis');
 const { Readable } = require('stream');
+const fs = require('fs');
+const path = require('path');
+
+const serviceAccount = process.env.ENVIRONMENT === 'development'
+  ? require("../Config/noteboost-9338bf458b11.json")
+  : JSON.parse(fs.readFileSync('/secrets/drive', 'utf8'));
 
 const auth = new google.auth.GoogleAuth({
+  credentials: serviceAccount,
   scopes: ['https://www.googleapis.com/auth/drive'],
 });
 
