@@ -49,7 +49,7 @@ async function uploadToDrive(file) {
       requestBody: { role: "reader", type: "anyone" },
     });
 
-    const link = `https://lh3.googleusercontent.com/d/${response.data.id}=s1080`;
+    const link = `https://drive.google.com/uc?export=view&id=${response.data.id}`;
 
     console.log("🌍 Public link:", link);
     return link;

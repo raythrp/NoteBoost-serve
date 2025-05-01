@@ -140,5 +140,23 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/history/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const historyRef = db.collection("history").doc(id);
+    const historyDoc = await historyRef.get();
+
+    if (!historyDoc.exists) {
+      return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    }
+
+    res.status(200).json({ id: historyDoc.id, ...historyDoc.data() });
+  } catch (error) {
+    res.status(500).json({ error: "Gagal mengambil catatan" });
+  }
+});
+
+
 
 module.exports = router;
