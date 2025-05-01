@@ -50,7 +50,7 @@ async function uploadToDrive(file) {
       requestBody: { role: "reader", type: "anyone" },
     });
 
-    const link = response.data.thumbnailLink || response.data.webContentLink;
+    const link = `https://drive.google.com/file/d/${response.data.id}/preview`;
 
     console.log("🌍 Public link:", link);
     return link;
