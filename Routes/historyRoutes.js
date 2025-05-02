@@ -115,12 +115,15 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
     "${isi_catatan_asli}"`;
 
     const geminiResponse = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=YOUR_API_KEY`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent`,
       {
         contents: [{ parts: [{ text: prompt }] }],
       },
       {
         headers: { "Content-Type": "application/json" },
+        params: {
+          key: process.env.GEMINI_API_KEY,
+        },
       }
     );
 
