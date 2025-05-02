@@ -32,5 +32,6 @@ app.use("/api/profilepic", profilePictureRoutes);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(process.env.OCR_API_KEY)
 });
 
