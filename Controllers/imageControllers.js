@@ -21,7 +21,7 @@ const extractTextFromImage = async (req, res) => {
         const response = await axios.post('https://api.ocr.space/parse/image', form, {
             headers: {
                 ...form.getHeaders(),
-                apikey: 'K86347452688957',
+                apikey: process.env.OCR_API_KEY,
             },
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
