@@ -67,30 +67,9 @@ const extractTextAndSave = async (req, res) => {
 
         const parsedText = response.data?.ParsedResults?.[0]?.ParsedText || 'No text found';
 
-        // Ambil data dari body request
-        const { tanggal_waktu, kelas, mata_pelajaran, topik } = req.body;
-        const email = req.user.email; // dari verifyToken
-
-        if (!tanggal_waktu || !kelas || !mata_pelajaran || !topik) {
-            return res.status(400).json({ error: 'Missing required fields in request body' });
-        }
-
-        // Simpan ke Firestore
-        const historyRef = db.collection('history').doc();
-        await historyRef.set({
-            email,
-            tanggal_waktu,
-            kelas,
-            mata_pelajaran,
-            topik,
-            isi_catatan_asli: parsedText,
-            hasil_enhance: null,
-        });
-
         return res.status(201).json({
             message: 'Catatan berhasil dibuat dari gambar',
             extractedText: parsedText,
-            id: historyRef.id
         });
     } catch (error) {
         console.error('OCR Save Error:', error.response?.data || error.message || error);
