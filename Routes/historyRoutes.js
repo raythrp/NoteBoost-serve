@@ -59,7 +59,7 @@ router.put("/history/:id", verifyToken, async (req, res) => {
 });
 router.put("/history/:id/update-details", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { kelas, mata_pelajaran, topik } = req.body; // Update kelas, matpel, dan topik
+  const { kelas, mata_pelajaran, topik } = req.body;
 
   try {
     const historyRef = db.collection("history").doc(id);
