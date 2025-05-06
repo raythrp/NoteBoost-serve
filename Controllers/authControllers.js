@@ -169,3 +169,11 @@ exports.resetPassword = async (req, res) => {
     res.status(400).json({ error: error.response?.data?.error?.message || "Gagal reset password" });
   }
 };
+
+exports.checkTokenExpiry = async (req, res) => {
+  try {
+    res.json({ message: "Session valid"})
+  } catch (error) {
+    res.status(500).json({ message: 'Session invalid'})
+  }
+}
