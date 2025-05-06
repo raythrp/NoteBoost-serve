@@ -2,6 +2,7 @@ const express = require("express");
 const { admin, db } = require("../Config/firebase");
 const verifyToken = require("../Middleware/authMiddleware");
 const router = express.Router();
+const { convert } = require("quill-delta-to-html");
 
 router.post("/history", verifyToken, async (req, res) => {
   const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli } = req.body;
@@ -87,10 +88,26 @@ router.delete("/history/:id", verifyToken, async (req, res) => {
   }
 });
 
-// Router untuk menyimpan catatan asli (Delta) dan mengirimkan HTML ke Gemini
+router.put("/history/:id/update-enhanced", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { hasil_enhance } = req.body;
+
+  try {
+    const historyRef = db.collection("history").doc(id);
+    await historyRef.update({
+      hasil_enhance: hasil_enhance,
+    });
+
+    res.status(200).json({ message: "Hasil enhance berhasil disimpan" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Gagal menyimpan hasil enhance" });
+  }
+});
+
 router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { htmlContent } = req.body; // Ambil HTML dari frontend
+  const { htmlContent } = req.body;
 
   try {
     const historyRef = db.collection("history").doc(id);
@@ -115,7 +132,7 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
     const geminiResponse = await axios.post(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
       {
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts: [{ text: prompt }] }], 
       },
       {
         headers: {
@@ -133,11 +150,7 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       return res.status(500).json({ error: "Gagal mendapatkan hasil enhance dari Gemini" });
     }
 
-    const deltaContent = quill.clipboard.convert(enhancedNote);
-
-    await historyRef.update({ hasil_enhance: deltaContent });
-
-    res.status(200).json({ message: "Catatan berhasil dienhance", hasil_enhance: deltaContent });
+    res.status(200).json({ message: "Catatan berhasil dienhance", hasil_enhance: enhancedNote });
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Gagal melakukan enhance catatan" });
