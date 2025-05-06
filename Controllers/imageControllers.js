@@ -1,11 +1,16 @@
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
 const FormData = require('form-data');
 const { db } = require("../Config/firebase");
 const { ImageAnnotatorClient } = require('@google-cloud/vision');
+const localKeyPath = path.join(__dirname, 'noteboost-243b40968aef.json');
+const gcpKeyPath = '/secrets/cloud_vision/CLOUD_VISION_KEY';
+const keyFilename = fs.existsSync(localKeyPath) ? localKeyPath : gcpKeyPath;
 const client = new ImageAnnotatorClient({
-    keyFilename: path.join(__dirname, 'noteboost-243b40968aef.json')  // Ganti dengan path yang benar
+    keyFilename: keyFilename,
 });
+console.log(`Menggunakan file secret dari: ${keyFilename}`);
 require('dotenv').config()
 
 
