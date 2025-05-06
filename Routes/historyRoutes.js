@@ -87,8 +87,10 @@ router.delete("/history/:id", verifyToken, async (req, res) => {
   }
 });
 
+// Router untuk menyimpan catatan asli (Delta) dan mengirimkan HTML ke Gemini
 router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   const { id } = req.params;
+  const { htmlContent } = req.body; // Ambil HTML dari frontend
 
   try {
     const historyRef = db.collection("history").doc(id);
@@ -98,29 +100,27 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Catatan tidak ditemukan" });
     }
 
-    const { isi_catatan_asli, topik, kelas, mata_pelajaran, jenjang } = historyDoc.data();
-
-    if (!isi_catatan_asli) {
-      return res.status(400).json({ error: "Catatan masih kosong, tidak bisa enhance" });
-    }
+    const { topik, kelas, mata_pelajaran, jenjang } = historyDoc.data();
 
     const prompt = `Konteks Catatan:
-    - Jenjang Pendidikan: ${jenjang}
-    - Kelas: ${kelas}
-    - Mata Pelajaran: ${mata_pelajaran}
-    - Topik: ${topik}
+      Jenjang Pendidikan: ${jenjang}
+      Kelas: ${kelas}
+      Mata Pelajaran: ${mata_pelajaran}
+      Topik: ${topik}
+      
+      Tolong Enhance catatan berikut menjadi lebih rapi dan sesuai dengan standar jenjang, kelas, mata pelajaran dan topik yang telah diberikan dan kembalikan output dengan HTML format dan gausah pake doctype:
 
-    Tolong perbaiki dan buat catatan berikut menjadi lebih rapi, jelas, dan sesuai dengan standar jenjang tersebut:
-
-    "${isi_catatan_asli}"`;
+      "${htmlContent}"`;
 
     const geminiResponse = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent`,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
       {
         contents: [{ parts: [{ text: prompt }] }],
       },
       {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         params: {
           key: process.env.GEMINI_API_KEY,
         },
@@ -133,15 +133,17 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       return res.status(500).json({ error: "Gagal mendapatkan hasil enhance dari Gemini" });
     }
 
-    await historyRef.update({ hasil_enhance: enhancedNote });
+    const deltaContent = quill.clipboard.convert(enhancedNote);
 
-    res.status(200).json({ message: "Catatan berhasil dienhance", hasil_enhance: enhancedNote });
+    await historyRef.update({ hasil_enhance: deltaContent });
 
+    res.status(200).json({ message: "Catatan berhasil dienhance", hasil_enhance: deltaContent });
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Gagal melakukan enhance catatan" });
   }
 });
+
 
 router.get("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
