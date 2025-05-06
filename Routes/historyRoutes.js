@@ -3,6 +3,7 @@ const { admin, db } = require("../Config/firebase");
 const verifyToken = require("../Middleware/authMiddleware");
 const router = express.Router();
 const { convert } = require("quill-delta-to-html");
+const axios = require('axios');
 
 router.post("/history", verifyToken, async (req, res) => {
   const { tanggal_waktu, kelas, mata_pelajaran, topik, isi_catatan_asli } = req.body;
@@ -170,7 +171,7 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       "${htmlContent}"`;
 
     const geminiResponse = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
       {
         contents: [{ parts: [{ text: prompt }] }], 
       },
