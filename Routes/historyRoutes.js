@@ -109,21 +109,38 @@ router.get("/history/:id/original", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Get the document from the Firestore database
     const historyRef = db.collection("history").doc(id);
     const historyDoc = await historyRef.get();
 
     if (!historyDoc.exists) {
+      // If the document doesn't exist, return a 404 error
       return res.status(404).json({ error: "Catatan tidak ditemukan" });
     }
 
+    // Retrieve the Delta content from Firestore
     const { isi_catatan_asli } = historyDoc.data();
-    
-    // Convert the Delta (isi_catatan_asli) to HTML
-    const htmlContent = convert(isi_catatan_asli);
 
+    if (!isi_catatan_asli) {
+      // If there's no content, return an error
+      return res.status(400).json({ error: "Isi catatan tidak tersedia" });
+    }
+
+    // Convert Delta to HTML using quill-delta-to-html
+    let htmlContent;
+    try {
+      htmlContent = convert(isi_catatan_asli);
+    } catch (error) {
+      console.error("Error converting Delta to HTML:", error);
+      return res.status(500).json({ error: "Gagal mengkonversi catatan" });
+    }
+
+    // Send the converted HTML content as a response
     res.status(200).json({ htmlContent });
+
   } catch (error) {
-    console.error(error);
+    // Log and respond with a specific error if any unexpected issues occur
+    console.error("Error fetching history:", error.message || error);
     res.status(500).json({ error: "Gagal mengambil catatan" });
   }
 });
