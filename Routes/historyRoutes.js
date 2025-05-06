@@ -105,6 +105,29 @@ router.put("/history/:id/update-enhanced", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/history/:id/original", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const historyRef = db.collection("history").doc(id);
+    const historyDoc = await historyRef.get();
+
+    if (!historyDoc.exists) {
+      return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    }
+
+    const { isi_catatan_asli } = historyDoc.data();
+    
+    // Convert the Delta (isi_catatan_asli) to HTML
+    const htmlContent = convert(isi_catatan_asli);
+
+    res.status(200).json({ htmlContent });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Gagal mengambil catatan" });
+  }
+});
+
 router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { htmlContent } = req.body;
