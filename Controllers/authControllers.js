@@ -2,6 +2,10 @@ const { admin, db } = require("../Config/firebase");
 const transporter = require("../Config/mailer");
 const axios = require('axios');
 
+function isValidJenjang(jenjang) {
+  return ["SMP", "SMA"].includes(jenjang);
+}
+
 exports.login = async (req, res) => {
   const { idToken } = req.body;
 
@@ -50,6 +54,10 @@ exports.login = async (req, res) => {
 exports.register = async (req, res) => {
   const { email, password, nama, jenjang } = req.body;
 
+  if (!isValidJenjang(jenjang)) {
+    return res.status(400).json({ error: "Jenjang harus SMP atau SMA" });
+  }
+
   try {
     const userRecord = await admin.auth().createUser({ email, password });
 
@@ -82,7 +90,12 @@ exports.register = async (req, res) => {
 };
 
 exports.updateUserInfo = async (req, res) => {
-  const { email, jenjang } = req.body;
+  const { jenjang } = req.body;
+  const email = req.user.email;
+
+  if (!isValidJenjang(jenjang)) {
+    return res.status(400).json({ error: "Jenjang harus SMP atau SMA" });
+  }
 
   try {
     const userRef = db.collection("users").doc(email);
@@ -95,10 +108,15 @@ exports.updateUserInfo = async (req, res) => {
 };
 
 exports.updateJenjang = async (req, res) => {
-  const { email, jenjang } = req.body;
+  const { jenjang } = req.body;
+  const email = req.user.email;
 
   if (!email || !jenjang) {
     return res.status(400).json({ error: "Email dan Jenjang wajib diisi" });
+  }
+
+  if (!isValidJenjang(jenjang)) {
+    return res.status(400).json({ error: "Jenjang harus SMP atau SMA" });
   }
 
   try {
@@ -124,7 +142,7 @@ exports.logout = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
+  const email = req.user.email;
 
   try {
     const user = await admin.auth().getUserByEmail(email);
