@@ -9,7 +9,7 @@ router.post("/register", register);
 router.post("/logout", logout);
 router.post("/update-user", verifyToken, updateUserInfo);
 router.post("/update-jenjang", verifyToken, updateJenjang);  
-router.post("/forgot-password", forgotPassword);
+router.post("/forgot-password", verifyToken, forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/check", verifyToken ,checkTokenExpiry);
 module.exports = router;
