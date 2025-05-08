@@ -141,8 +141,39 @@ exports.logout = async (req, res) => {
   res.json({ message: "Logout handled on the client side" });
 };
 
-exports.forgotPassword = async (req, res) => {
+exports.forgotPasswordProtected = async (req, res) => {
   const email = req.user.email;
+
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
+
+    await transporter.sendMail({
+      from: `"NoteBoost" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset Password NoteBoost",
+      html: `
+        <p>Hai ${user.displayName || email}!</p>
+        <p>Kamu menerima email ini karena kami menerima permintaan reset password untuk akun kamu.</p>
+        <p>Klik link di bawah ini untuk reset password:</p>
+        <a href="${resetLink}">Reset Password</a>
+        <p><b>Note:</b> Jika kamu tidak merasa meminta reset password, abaikan email ini.</p>
+      `
+    });
+
+    res.json({ message: "Reset password email sent" });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.forgotPasswordPublic = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email wajib diisi" });
+  }
 
   try {
     const user = await admin.auth().getUserByEmail(email);
