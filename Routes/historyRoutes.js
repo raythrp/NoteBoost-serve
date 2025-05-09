@@ -139,7 +139,7 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "Catatan tidak ditemukan" });
     }
 
-    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
+    if (historyDoc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
 
     const { topik, kelas, mata_pelajaran, jenjang } = historyDoc.data();
 
