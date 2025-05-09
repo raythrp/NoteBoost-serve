@@ -46,30 +46,41 @@ router.get("/history", verifyToken, async (req, res) => {
 router.put("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { tanggal_waktu, isi_catatan_asli } = req.body;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
-    await historyRef.update({
-      tanggal_waktu,
-      isi_catatan_asli,
-    });
+    const doc = await historyRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    }
+
+    if (doc.data().email !== userEmail) {
+      return res.status(403).json({ error: "Akses ditolak" });
+    }
+
+    await historyRef.update({ tanggal_waktu, isi_catatan_asli });
 
     res.status(200).json({ message: "Catatan berhasil diperbarui" });
   } catch (error) {
     res.status(500).json({ error: "Catatan gagal diperbarui" });
   }
 });
+
 router.put("/history/:id/update-details", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { kelas, mata_pelajaran, topik } = req.body;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
-    await historyRef.update({
-      kelas,
-      mata_pelajaran,
-      topik,
-    });
+    const doc = await historyRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
+
+    await historyRef.update({ kelas, mata_pelajaran, topik });
 
     res.status(200).json({ message: "Kelas, Mata Pelajaran, dan Topik berhasil diperbarui" });
   } catch (error) {
@@ -79,9 +90,15 @@ router.put("/history/:id/update-details", verifyToken, async (req, res) => {
 
 router.delete("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
+    const doc = await historyRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
+
     await historyRef.delete();
     res.status(200).json({ message: "Catatan berhasil dihapus" });
   } catch (error) {
@@ -92,63 +109,27 @@ router.delete("/history/:id", verifyToken, async (req, res) => {
 router.put("/history/:id/update-enhanced", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { hasil_enhance } = req.body;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
-    await historyRef.update({
-      hasil_enhance: hasil_enhance,
-    });
+    const doc = await historyRef.get();
+
+    if (!doc.exists) return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
+
+    await historyRef.update({ hasil_enhance });
 
     res.status(200).json({ message: "Hasil enhance berhasil disimpan" });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Gagal menyimpan hasil enhance" });
-  }
-});
-
-router.get("/history/:id/original", verifyToken, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    // Get the document from the Firestore database
-    const historyRef = db.collection("history").doc(id);
-    const historyDoc = await historyRef.get();
-
-    if (!historyDoc.exists) {
-      // If the document doesn't exist, return a 404 error
-      return res.status(404).json({ error: "Catatan tidak ditemukan" });
-    }
-
-    // Retrieve the Delta content from Firestore
-    const { isi_catatan_asli } = historyDoc.data();
-
-    if (!isi_catatan_asli) {
-      // If there's no content, return an error
-      return res.status(400).json({ error: "Isi catatan tidak tersedia" });
-    }
-
-    // Convert Delta to HTML using quill-delta-to-html
-    let htmlContent;
-    try {
-      htmlContent = convert(isi_catatan_asli);
-    } catch (error) {
-      console.error("Error converting Delta to HTML:", error);
-      return res.status(500).json({ error: "Gagal mengkonversi catatan" });
-    }
-
-    // Send the converted HTML content as a response
-    res.status(200).json({ htmlContent });
-
-  } catch (error) {
-    // Log and respond with a specific error if any unexpected issues occur
-    console.error("Error fetching history:", error.message || error);
-    res.status(500).json({ error: "Gagal mengambil catatan" });
   }
 });
 
 router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { htmlContent } = req.body;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
@@ -157,6 +138,8 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
     if (!historyDoc.exists) {
       return res.status(404).json({ error: "Catatan tidak ditemukan" });
     }
+
+    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
 
     const { topik, kelas, mata_pelajaran, jenjang } = historyDoc.data();
 
@@ -198,24 +181,21 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
   }
 });
 
-
 router.get("/history/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
+  const userEmail = req.user.email;
 
   try {
     const historyRef = db.collection("history").doc(id);
-    const historyDoc = await historyRef.get();
+    const doc = await historyRef.get();
 
-    if (!historyDoc.exists) {
-      return res.status(404).json({ error: "Catatan tidak ditemukan" });
-    }
+    if (!doc.exists) return res.status(404).json({ error: "Catatan tidak ditemukan" });
+    if (doc.data().email !== userEmail) return res.status(403).json({ error: "Akses ditolak" });
 
-    res.status(200).json({ id: historyDoc.id, ...historyDoc.data() });
+    res.status(200).json({ id: doc.id, ...doc.data() });
   } catch (error) {
     res.status(500).json({ error: "Gagal mengambil catatan" });
   }
 });
-
-
 
 module.exports = router;
