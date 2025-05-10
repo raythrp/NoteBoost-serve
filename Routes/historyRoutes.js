@@ -149,7 +149,7 @@ router.post("/history/:id/enhance", verifyToken, async (req, res) => {
       Mata Pelajaran: ${mata_pelajaran}
       Topik: ${topik}
       
-      Tolong Enhance catatan berikut menjadi lebih rapi dan sesuai dengan standar jenjang, kelas, mata pelajaran dan topik yang telah diberikan dan kembalikan output dengan HTML sederhana tanpa css, gausah pake doctype, tidak usah pakai kalimat pengantar dan penutup, tidak usah pakai title, langsung isi catatan saja:
+      Tolong Enhance catatan berikut menjadi lebih rapi dan sesuai dengan standar jenjang, kelas, mata pelajaran dan topik yang telah diberikan dan kembalikan output dengan HTML sederhana tanpa css, tidak usah pakai <!DOCTYPE html>, tidak usah pakai kalimat pengantar dan penutup, tidak usah pakai title, langsung isi catatan saja:
 
       "${htmlContent}"`;
 
