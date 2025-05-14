@@ -16,6 +16,7 @@ app.use(cors({
     "http://localhost:8080",
     "https://noteboost-772262781875.asia-southeast2.run.app",
     "https://noteboost-sg-772262781875.asia-southeast1.run.app",
+    "https://www.noteboost.site"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
